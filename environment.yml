@@ -1,0 +1,89 @@
+# =============================================================================
+# Hospital Sink Disinfection Study - Conda Environment
+#
+# Create a reproducible environment with:
+# conda env create -f environment.yml
+# conda activate hospital_sink_analysis
+# =============================================================================
+
+name: hospital_sink_analysis
+
+channels:
+  - conda-forge
+  - bioconda
+  - r
+
+dependencies:
+  # Python (for potential data processing)
+  - python=3.9
+  - pandas
+  - numpy
+  - matplotlib
+  - seaborn
+  - jupyter
+
+  # R and essential packages
+  - r-base>=4.0.0
+  - r-essentials
+
+  # Core data manipulation
+  - r-dplyr>=1.0.0
+  - r-tidyr
+  - r-readr
+  - r-tibble
+  - r-magrittr
+
+  # Statistical analysis
+  - r-vegan>=2.5.0
+  - r-lme4
+  - r-broom
+  - r-car
+  - r-emmeans
+
+  # Specialized packages
+  - r-indicspecies
+  - r-igraph
+  - r-corrplot
+
+  # Visualization
+  - r-ggplot2>=3.3.0
+  - r-ggrepel
+  - r-cowplot
+  - r-gridextra
+  - r-scales
+  - r-rcolorbrewer
+  - r-viridis
+
+  # Utilities
+  - r-here
+  - r-lubridate
+  - r-stringr
+  - r-forcats
+
+  # QIIME2 for sequence processing (optional)
+  - qiime2>=2023.5
+
+  # Bioconductor packages (install via pip/R after environment creation)
+  - pip
+
+  # Additional tools
+  - git
+  - wget
+  - curl
+
+pip:
+  # Python packages not available in conda
+  - biom-format
+
+# =============================================================================
+# Post-installation setup:
+#
+# After creating the environment, install ALDEx2 and patchwork:
+#
+# R -e "if (!require('BiocManager', quietly = TRUE)) install.packages('BiocManager')"
+# R -e "BiocManager::install('ALDEx2')"
+# R -e "install.packages('patchwork')"
+#
+# Verify installation:
+# R -e "source('analysis/00_load_libraries.R')"
+# =============================================================================
