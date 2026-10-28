@@ -74,7 +74,7 @@ source("analysis/01_data_preprocessing.R")
 # Statistical analyses
 source("analysis/02_alpha_diversity.R")          # rarefied observed genera + Shannon
 source("analysis/04_differential_abundance.R")   # ALDEx2 on raw genus counts
-source("analysis/04b_da_calibration.R")          # room-shuffle calibration (~1-2 h)
+source("analysis/04b_da_calibration.R")          # room-shuffle calibration (~10-15 min)
 source("analysis/05_community_volatility.R")
 source("analysis/06_community_instability.R")
 source("analysis/07_weekly_permanova.R")         # Table S3

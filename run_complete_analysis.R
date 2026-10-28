@@ -5,7 +5,7 @@
 # Description: Master script to run the complete analysis pipeline
 # Requires data/ tables built by preprocessing/02_decontam.R and
 # preprocessing/03_build_taxa_tables.R.
-# Set RUN_CALIBRATION <- FALSE to skip 04b_da_calibration.R (~1-2 hours).
+# Set RUN_CALIBRATION <- FALSE to skip 04b_da_calibration.R (~10-15 minutes).
 # =============================================================================
 
 if (!exists("RUN_CALIBRATION")) RUN_CALIBRATION <- TRUE

@@ -22,7 +22,7 @@
 # Same samples, genera and >= 5% prevalence filter for every method; shuffles
 # use seeds 101-120 (1-5 for all methods and locations, 1-20 for ALDEx2 TP/PT).
 # Result: only ALDEx2 is close to calibrated (0-6 genera with shuffled labels),
-# so the manuscript reports ALDEx2 only. Runtime is roughly 1-2 hours.
+# so the manuscript reports ALDEx2 only. Runtime is roughly 10-15 minutes.
 # =============================================================================
 
 source("analysis/00_load_libraries.R")
