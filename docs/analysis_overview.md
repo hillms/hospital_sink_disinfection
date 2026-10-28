@@ -18,13 +18,28 @@ Hospital-acquired infections represent a major public health challenge, with hos
 - **Joint analysis**: Creates instability landscape with four quadrants
 - **Controlled instability**: Treatment signature of low ACF + low R²
 
-### 3. Ecological Replacement Paradigm
+### 3. Compositional Shift Under Treatment
 - **Traditional view**: Sterilization eliminates all microbes
-- **Our finding**: Treatment establishes alternative stable states
-- **Mechanism**: Soil/water bacteria replace healthcare-associated pathogens
-- **Advantage**: Maintains environmental responsiveness while resisting pathogens
+- **Our finding**: Treated plumbing communities are relatively enriched in environmental taxa and depleted in ESKAPEE genera
+- **Open question**: Relative abundance data cannot distinguish competitive exclusion from differential survival of oxidant-tolerant bacteria
 
-## Key Methodological Innovations
+## Key Methodological Choices
+
+### Contaminant Removal
+- **decontam (prevalence method)** against 12 negative-control libraries
+- **Removal rule**: score P < 0.1 and present in >= 50% of the controls of every site type; 2 ASVs removed (1.4% of reads)
+- **Frequency/combined modes not used**: treatment lowers DNA yield, so the frequency test flags taxa genuinely enriched in treated sinks
+
+### Read Depth and Rarefaction
+- Read depth is confounded with treatment (median tail-piece reads 1,459 treated vs 67,339 untreated)
+- **Alpha diversity**: raw genus counts rarefied to 1,000 reads
+- **Differential abundance**: ALDEx2 on raw (unrarefied) genus counts
+
+### Differential Abundance Calibration
+- Treatment was assigned by room and each room sampled ~35 times, so samples are not independent
+- Treatment labels shuffled among the 31 rooms remove any true effect; a well-calibrated method should then call ~0 genera
+- ALDEx2 called 0-6 genera with shuffled labels; DESeq2 (6-27) and edgeR (30-74) were poorly calibrated, so only ALDEx2 is reported
+- Tail piece / P-trap agreement is measured as genera significant at both sites in the same direction (31 with true labels vs median 0 with shuffled labels), not by effect-size correlation, which shuffled labels also produce
 
 ### Compositional Data Analysis
 - **CLR transformation**: Properly handles compositional data constraints
@@ -39,7 +54,6 @@ Hospital-acquired infections represent a major public health challenge, with hos
 
 ### Statistical Rigor
 - **Multiple testing correction**: Benjamini-Hochberg procedure
-- **Effect size estimation**: Cohen's d for practical significance
 - **Robust methods**: Wilcoxon tests for non-parametric data
 - **Spatial controls**: Countertop samples as negative controls
 
@@ -55,24 +69,20 @@ Treatment effects follow a clear spatial pattern:
 - **Immediate onset**: Effects detectable from week 1
 - **Sustained efficacy**: Maintained throughout 35-week study
 - **Episodic responses**: Weekly variations suggest perturbation-response dynamics
-- **No habituation**: No evidence of microbial adaptation
 
 ### Pathogen Control
-- **ESKAPEE enrichment**: Pathogens significantly higher in untreated sinks
-- **Environmental replacement**: 85% of treatment-enriched genera are soil/water-associated
-- **Ecological resistance**: Treated communities resist pathogen colonization
+- **ESKAPEE enrichment**: Enterobacter, Klebsiella and Acinetobacter relatively enriched in untreated sinks
+- **Environmental taxa**: Treated plumbing relatively enriched in environmental genera such as Afipia, Bradyrhizobium and Pelomonas
+- **Caveat**: Relative abundances; treated samples yield less DNA, so enrichment does not imply higher absolute abundance
 
 ## Clinical Relevance
 
 ### Healthcare Applications
-- **Environmental management**: Paradigm shift from sterilization to ecological control
-- **Infection prevention**: Reduces pathogen reservoir in critical healthcare infrastructure
-- **Sustainability**: Maintains microbial ecosystem function while controlling pathogens
+- **Environmental management**: Supports evaluating cleaning by its effect on community composition, not only by bioburden reduction
+- **Infection prevention**: Lower relative abundance of ESKAPEE genera in treated plumbing
 
 ### Broader Implications
-- **Antimicrobial strategy**: Ecological replacement vs. broad spectrum elimination
-- **Resistance prevention**: Avoids selection pressure for antimicrobial resistance
-- **Ecosystem health**: Preserves beneficial microbial functions
+- **Antimicrobial strategy**: Shifting community composition as a complement to broad-spectrum elimination
 
 ## Future Directions
 
@@ -95,12 +105,14 @@ Treatment effects follow a clear spatial pattern:
 
 The analysis pipeline implements a comprehensive statistical framework:
 
-1. **Data preprocessing**: Quality control and normalization
-2. **Alpha diversity**: Within-sample diversity metrics
-3. **Beta diversity**: Between-sample compositional differences
-4. **Differential abundance**: Taxa-specific treatment effects
-5. **Community volatility**: Temporal compositional turnover
-6. **Community instability**: Temporal autocorrelation and drift
-7. **Visualization**: Publication-ready figure generation
+1. **Contaminant removal**: decontam prevalence method (`preprocessing/02_decontam.R`)
+2. **Data preprocessing**: Normalized and raw genus tables, sample filtering
+3. **Alpha diversity**: Observed genera and Shannon, rarefied to 1,000 reads
+4. **Beta diversity**: Aitchison PCA (Figure 3B)
+5. **Differential abundance**: ALDEx2 on raw counts, with a room-shuffle calibration check
+6. **Community volatility**: Temporal compositional turnover
+7. **Community instability**: Temporal autocorrelation and drift
+8. **Weekly PERMANOVA**: Treatment effect by week (Table S3)
+9. **Visualization and tables**: Figures 1-5, Table 1, Tables S1-S3
 
 This framework provides a template for similar microbiome studies in healthcare and other built environments.

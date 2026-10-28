@@ -227,7 +227,7 @@ for (st in SAMPLE_TYPE_LABELS) {
     clusters <- list()
     current_cluster <- sig_weeks[1]
 
-    for (i in 2:length(sig_weeks)) {
+    for (i in seq_along(sig_weeks)[-1]) {
       if (sig_weeks[i] == sig_weeks[i-1] + 1) {
         # Consecutive week
         current_cluster <- c(current_cluster, sig_weeks[i])

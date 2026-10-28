@@ -16,12 +16,17 @@ Thumbs.db
 
 # Large data files (download separately)
 data/parsed_taxa_table.csv
+data/genus_counts_raw.csv
 data/metadata_run1_10.csv
+
+# Preprocessing outputs (QIIME2 exports, decontam results)
+result/
 
 # Analysis outputs (can be regenerated)
 analysis/*.RData
 analysis/*.csv
 figures/output/
+tables/output/
 
 # Temporary files
 *.tmp

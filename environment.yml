@@ -40,6 +40,14 @@ dependencies:
   - r-car
   - r-emmeans
 
+  # Bioconductor packages
+  - bioconductor-aldex2
+  - bioconductor-decontam
+  - bioconductor-deseq2
+  - bioconductor-edger
+  - r-data.table
+  - r-patchwork
+
   # Specialized packages
   - r-indicspecies
   - r-igraph
@@ -77,12 +85,6 @@ pip:
 
 # =============================================================================
 # Post-installation setup:
-#
-# After creating the environment, install ALDEx2 and patchwork:
-#
-# R -e "if (!require('BiocManager', quietly = TRUE)) install.packages('BiocManager')"
-# R -e "BiocManager::install('ALDEx2')"
-# R -e "install.packages('patchwork')"
 #
 # Verify installation:
 # R -e "source('analysis/00_load_libraries.R')"

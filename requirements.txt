@@ -26,7 +26,13 @@ install.packages(c(
 if (!require("BiocManager", quietly = TRUE)) {
   install.packages("BiocManager")
 }
-BiocManager::install("ALDEx2")  # Differential abundance analysis for compositional data
+BiocManager::install(c(
+  "ALDEx2",        # Differential abundance analysis for compositional data
+  "decontam",      # Contaminant identification (preprocessing/02_decontam.R)
+  "DESeq2",        # Calibration comparison (analysis/04b_da_calibration.R)
+  "edgeR"          # Calibration comparison (analysis/04b_da_calibration.R)
+))
+install.packages("data.table")  # Fast reading of the feature tables
 
 # Specialized ecological packages
 install.packages(c(
@@ -69,7 +75,8 @@ install.packages(c(
 #
 # Critical package versions:
 # - vegan >= 2.5.0 (for ecological statistics)
-# - ALDEx2 >= 1.20.0 (for differential abundance)
+# - ALDEx2 >= 1.20.0 (for differential abundance; manuscript results: 1.32.0)
+# - decontam 1.22.0, DESeq2 1.40.2, edgeR 3.42.4 (manuscript results)
 # - ggplot2 >= 3.3.0 (for visualization)
 # - dplyr >= 1.0.0 (for data manipulation)
 #
