@@ -56,6 +56,11 @@ suppressPackageStartupMessages({
   library(corrplot)      # Correlation plots
 })
 
+# Resolve masked functions: MASS (attached via ALDEx2's dependencies) masks
+# dplyr::select, and igraph masks vegan::diversity
+select <- dplyr::select
+diversity <- vegan::diversity
+
 # =============================================================================
 # Define Global Variables and Functions
 # =============================================================================

@@ -1,12 +1,17 @@
 # =============================================================================
 # Hospital Sink Disinfection Study - Complete Analysis Pipeline
 #
-# Authors: Megan Stroup Hill, Claude Sonnet 4
+# Authors: Megan Stroup Hill, Claude Sonnet 4, Claude
 # Description: Master script to run the complete analysis pipeline
+# Requires data/ tables built by preprocessing/02_decontam.R and
+# preprocessing/03_build_taxa_tables.R.
+# Set RUN_CALIBRATION <- FALSE to skip 04b_da_calibration.R (~1-2 hours).
 # =============================================================================
 
+if (!exists("RUN_CALIBRATION")) RUN_CALIBRATION <- TRUE
+
 # Set working directory to repository root
-if (basename(getwd()) != "hospital_sink_disinfection") {
+if (!file.exists("run_complete_analysis.R")) {
   stop("Please run this script from the repository root directory")
 }
 
@@ -22,6 +27,7 @@ cat("Step 0: Checking prerequisites...\n")
 # Check for required data files
 required_files <- c(
   "data/parsed_taxa_table.csv",
+  "data/genus_counts_raw.csv",
   "data/metadata_run1_10.csv"
 )
 
@@ -80,19 +86,27 @@ if (file.exists("analysis/03_beta_diversity.R")) {
 }
 
 # =============================================================================
-# Step 4: Differential Abundance Analysis (if available)
+# Step 4: Differential Abundance Analysis
 # =============================================================================
-cat("\nStep 4: Running differential abundance analysis...\n")
+cat("\nStep 4: Running differential abundance analysis (ALDEx2, raw counts)...\n")
 
-if (file.exists("analysis/04_differential_abundance.R")) {
+tryCatch({
+  source("analysis/04_differential_abundance.R")
+  cat("✓ Differential abundance analysis completed\n")
+}, error = function(e) {
+  stop("Error in differential abundance analysis: ", e$message)
+})
+
+if (RUN_CALIBRATION) {
+  cat("\nStep 4b: Running differential abundance calibration (room-shuffled labels)...\n")
   tryCatch({
-    source("analysis/04_differential_abundance.R")
-    cat("✓ Differential abundance analysis completed\n")
+    source("analysis/04b_da_calibration.R")
+    cat("✓ Calibration analysis completed\n")
   }, error = function(e) {
-    cat("⚠ Warning: Differential abundance analysis failed: ", e$message, "\n")
+    cat("⚠ Warning: Calibration analysis failed: ", e$message, "\n")
   })
 } else {
-  cat("ℹ Differential abundance script not found, skipping...\n")
+  cat("\nStep 4b: Calibration skipped (RUN_CALIBRATION = FALSE)\n")
 }
 
 # =============================================================================
@@ -120,6 +134,18 @@ tryCatch({
 })
 
 # =============================================================================
+# Step 6b: Weekly Treatment PERMANOVA (Table S3)
+# =============================================================================
+cat("\nStep 6b: Running weekly PERMANOVA...\n")
+
+tryCatch({
+  source("analysis/07_weekly_permanova.R")
+  cat("✓ Weekly PERMANOVA completed\n")
+}, error = function(e) {
+  stop("Error in weekly PERMANOVA: ", e$message)
+})
+
+# =============================================================================
 # Step 7: Generate Figures
 # =============================================================================
 cat("\nStep 7: Generating manuscript figures...\n")
@@ -137,6 +163,14 @@ for (script in figure_scripts) {
     cat("  ⚠ Warning:", figure_name, "failed:", e$message, "\n")
   })
 }
+
+# Tables 1 and S1-S3 (Table S2 needs the calibration outputs)
+cat("\nGenerating manuscript tables...\n")
+tryCatch({
+  source("tables/make_tables.R")
+}, error = function(e) {
+  cat("⚠ Warning: table generation failed:", e$message, "\n")
+})
 
 # =============================================================================
 # Step 8: Generate Analysis Summary

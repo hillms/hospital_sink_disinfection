@@ -18,57 +18,29 @@ if (!file.exists("analysis/alpha_diversity_data.RData")) {
   stop("Error: Run analysis/02_alpha_diversity.R first to generate required data")
 }
 
-load("analysis/alpha_diversity_data.RData")
+# processed_data.RData holds meta_clean without diversity metrics, so load it
+# first and let alpha_diversity_data.RData overwrite meta_clean.
 load("analysis/processed_data.RData")
-
-# Ensure we have the diversity metrics in metadata
-if (!"Shannon" %in% colnames(meta_clean) || !"Chao1" %in% colnames(meta_clean)) {
-  # Calculate if not available
-  shannon <- diversity(comm, index = "shannon")
-  comm_int <- round(comm)
-  storage.mode(comm_int) <- "integer"
-  chao1_raw <- estimateR(comm_int)
-  chao1 <- chao1_raw["S.chao1", ]
-
-  meta_clean$Shannon <- shannon[meta_clean$SeqID]
-  meta_clean$Chao1 <- chao1[meta_clean$SeqID]
-}
+load("analysis/alpha_diversity_data.RData")
 
 # =============================================================================
 # Panel A: Alpha Diversity Boxplots with Significance
 # =============================================================================
-cat("Creating Panel A: Alpha diversity boxplots...\n")
+cat("Creating Panel A: Alpha diversity boxplots (rarefied to", RAREFY_DEPTH, "reads)...\n")
 
-# Calculate significance for each metric and sample type
-alpha_significance <- data.frame()
+# Wilcoxon tests with BH correction, from analysis/02_alpha_diversity.R
+alpha_significance <- alpha_results %>%
+  select(Sample_Type, Metric, p_adjusted, significance_adj)
 
-for (metric in c("Shannon", "Chao1")) {
-  for (st in SAMPLE_TYPE_LABELS) {
-    sub <- meta_clean %>% filter(Sample_Type == st)
+metric_labels <- c("Observed" = "Observed genera", "Shannon" = "Shannon")
 
-    if (nrow(sub) > 0 && length(unique(sub$Treatment)) == 2) {
-      w_test <- wilcox.test(sub[[metric]] ~ sub$Treatment)
-
-      alpha_significance <- rbind(alpha_significance, data.frame(
-        Sample_Type = st,
-        Metric = metric,
-        p_value = w_test$p.value,
-        significance = format_p_value(w_test$p.value)
-      ))
-    }
-  }
-}
-
-# Apply multiple testing correction
-alpha_significance$p_adjusted <- p.adjust(alpha_significance$p_value, method = "BH")
-alpha_significance$significance_adj <- format_p_value(alpha_significance$p_adjusted)
-
-# Prepare data for plotting
+# Prepare data for plotting (samples below the rarefaction depth are NA)
 meta_long <- meta_clean %>%
-  select(SeqID, Sample_Type, Treatment, Shannon, Chao1) %>%
-  pivot_longer(cols = c(Shannon, Chao1), names_to = "Metric", values_to = "Value")
+  select(SeqID, Sample_Type, Treatment, Observed, Shannon) %>%
+  pivot_longer(cols = c(Observed, Shannon), names_to = "Metric", values_to = "Value") %>%
+  filter(!is.na(Value))
 
-meta_long$Metric <- factor(meta_long$Metric, levels = c("Chao1", "Shannon"))
+meta_long$Metric <- factor(metric_labels[meta_long$Metric], levels = metric_labels)
 meta_long$Treatment <- factor(meta_long$Treatment, levels = c("Treated", "Untreated"))
 
 # Calculate bracket positions
@@ -77,7 +49,7 @@ bracket_pos <- meta_long %>%
   summarise(ymax = max(Value, na.rm = TRUE), .groups = "drop")
 
 # Merge significance with bracket positions
-alpha_significance$Metric <- factor(alpha_significance$Metric, levels = c("Chao1", "Shannon"))
+alpha_significance$Metric <- factor(metric_labels[alpha_significance$Metric], levels = metric_labels)
 alpha_significance$Sample_Type <- factor(alpha_significance$Sample_Type, levels = SAMPLE_TYPE_LABELS)
 
 bracket_data <- merge(alpha_significance, bracket_pos, by = c("Metric", "Sample_Type"))
@@ -221,7 +193,7 @@ cat("✓ Figure 3 saved to figures/output/\n")
 # Figure Summary
 # =============================================================================
 cat("\n=== FIGURE 3 SUMMARY ===\n")
-cat("Panel A: Alpha diversity boxplots (Shannon & Chao1) with significance brackets\n")
+cat("Panel A: Observed genera and Shannon (rarefied to", RAREFY_DEPTH, "reads) with significance brackets\n")
 cat("Panel B: Aitchison PCA per sample location with 95% confidence ellipses\n")
 cat("Ordering: Tail Piece → P-Trap → Countertop\n")
 cat("Statistical testing: Wilcoxon rank-sum with Benjamini-Hochberg correction\n")

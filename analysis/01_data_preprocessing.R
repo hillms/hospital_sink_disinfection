@@ -3,8 +3,11 @@
 #
 # Authors: Megan Stroup Hill, Claude Sonnet 4
 # Description: Load and preprocess data for downstream analyses
-# Input: parsed_taxa_table.csv, metadata_run1_10.csv
-# Output: Cleaned community matrix and metadata
+# Input: parsed_taxa_table.csv, genus_counts_raw.csv, metadata_run1_10.csv
+#        (built from the decontaminated table by preprocessing/02-03)
+# Output: Cleaned community matrices and metadata
+#   comm      depth-normalized genus abundances (samples × genera)
+#   comm_raw  raw genus read counts, same samples (rarefied alpha diversity, ALDEx2)
 # =============================================================================
 
 source("analysis/00_load_libraries.R")
@@ -113,6 +116,16 @@ meta_clean <- meta_clean[keep, ]
 cat("✓ Community matrix created:", nrow(comm), "samples ×", ncol(comm), "genera\n")
 cat("   Zero-sum samples removed:", sum(!keep), "\n")
 
+# Raw genus read counts for the same samples (all genera, alphabetical)
+if (!file.exists("data/genus_counts_raw.csv")) {
+  stop("Error: genus_counts_raw.csv not found in data/ directory (run preprocessing/03_build_taxa_tables.R)")
+}
+genus_raw <- read.csv("data/genus_counts_raw.csv", row.names = 1, check.names = FALSE)
+comm_raw <- t(as.matrix(genus_raw[, meta_clean$SeqID]))
+rm(genus_raw)
+cat("✓ Raw count matrix created:", nrow(comm_raw), "samples ×", ncol(comm_raw), "genera\n")
+cat("   Median reads per sample:", median(rowSums(comm_raw)), "\n")
+
 # =============================================================================
 # Step 6: Calculate Relative Abundances
 # =============================================================================
@@ -172,7 +185,7 @@ if (week_summary$missing_weeks != "") {
 cat("\nStep 9: Saving processed data...\n")
 
 # Save main objects for downstream analysis
-save(comm, comm_rel, meta_clean, genus_table, sample_summary,
+save(comm, comm_rel, comm_raw, meta_clean, genus_table, sample_summary,
      file = "analysis/processed_data.RData")
 
 # Also save as individual CSV files
